@@ -47,7 +47,9 @@ param_grid = {
     "model__min_samples_leaf": [1, 3]
 }
 if mlflow is not None:
-    mlflow.set_tracking_uri("file:./mlruns")
+    # Use SQLite instead of the deprecated local FileStore backend (required by MLflow 3).
+    tracking_db = BUILD_DIR / "mlflow.db"
+    mlflow.set_tracking_uri(f"sqlite:///{tracking_db.resolve()}")
     mlflow.set_experiment("tourism-package-prediction")
 search = GridSearchCV(pipeline, param_grid, cv=3, scoring="f1", n_jobs=-1, verbose=1)
 search.fit(X_train, y_train)
@@ -67,7 +69,7 @@ if mlflow is not None:
         mlflow.log_metrics(metrics)
         mlflow.log_param("model_type", "RandomForestClassifier")
         mlflow.log_param("sklearn_version", sklearn.__version__)
-        mlflow.sklearn.log_model(best_model, artifact_path="model")
+        mlflow.sklearn.log_model(best_model, name="model")
 DEPLOY_DIR.mkdir(parents=True, exist_ok=True)
 joblib.dump(best_model, DEPLOY_DIR / "model.joblib")
 with open(DEPLOY_DIR / "model_metadata.json", "w") as f:
