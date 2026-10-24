@@ -57,7 +57,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
-        run: python -m pip install pandas scikit-learn joblib mlflow
+        run: python -m pip install pandas scikit-learn joblib mlflow==3.0.1
       - name: Download train-test splits
         uses: actions/download-artifact@v4
         with:
