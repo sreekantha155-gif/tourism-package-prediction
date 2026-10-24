@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA_PATH = ROOT / "data" / "tourism.csv"
+DATA_PATH = ROOT / "tourism_project" / "data" / "tourism.csv"
 OUT_DIR = ROOT / "model_building"
 TARGET = "ProdTaken"
 
