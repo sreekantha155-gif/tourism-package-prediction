@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA_PATH = ROOT / "data" / "tourism.csv"
+DATA_PATH = ROOT / "data" / "tourism_project/data/tourism.csv"
 EXPECTED_COLUMNS = [
     "CustomerID", "ProdTaken", "Age", "TypeofContact", "CityTier",
     "DurationOfPitch", "Occupation", "Gender", "NumberOfPersonVisiting",
