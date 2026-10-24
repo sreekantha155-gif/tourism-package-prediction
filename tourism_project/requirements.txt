@@ -3,4 +3,3 @@ scikit-learn==1.5.2
 joblib==1.4.2
 mlflow==3.0.1
 streamlit==1.40.2
-SQLAlchemy==2.0.41
