@@ -1,0 +1,74 @@
+name: Tourism Project Pipeline
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  register-dataset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas
+      - name: Validate and register dataset
+        run: python tourism_project/model_building/data_register.py
+      - name: Upload registered dataset
+        uses: actions/upload-artifact@v4
+        with:
+          name: registered-data
+          path: tourism_project/data/tourism.csv
+
+  data-prep:
+    needs: register-dataset
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: python -m pip install pandas scikit-learn
+      - name: Prepare data
+        run: python tourism_project/model_building/prep.py
+      - name: Upload train-test splits
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-splits
+          path: |
+            tourism_project/model_building/Xtrain.csv
+            tourism_project/model_building/Xtest.csv
+            tourism_project/model_building/ytrain.csv
+            tourism_project/model_building/ytest.csv
+
+  model-training:
+    needs: data-prep
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: python -m pip install pandas scikit-learn joblib mlflow
+      - name: Download train-test splits
+        uses: actions/download-artifact@v4
+        with:
+          name: data-splits
+          path: tourism_project/model_building
+      - name: Train, tune, evaluate and save model
+        run: python tourism_project/model_building/train.py
+      - name: Commit trained model and metrics
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tourism_project/deployment/model.joblib tourism_project/deployment/model_metadata.json
+          git commit -m "Update trained tourism model [skip ci]" || echo "No model changes to commit"
+          git push
